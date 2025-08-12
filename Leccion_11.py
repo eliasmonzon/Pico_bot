@@ -65,7 +65,7 @@ def detecta():
     parar()
     bocina()
     bncs()
-    utime.sleep(0.3)
+    time.sleep(0.3)
     blancas.value(0)
     rojas.value(0)
     buzzer.duty_u16(0)
@@ -82,67 +82,68 @@ def inicio():
     notes = [440, 494, 523, 587, 659, 698, 784]
     for note in notes:
         playNote(note, 0.1, 0.1)
-        blancas.value(1)
-        time.sleep(0.02)
-        blancas.value(0)
-        time.sleep(0.02)
-        verdes.value(1)
-        time.sleep(0.02)
-        verdes.value(0)
-        time.sleep(0.02)
-        rojas.value(1)
-        time.sleep(0.02)
-        rojas.value(0)
+        for led in [blancas, verdes, rojas]:
+            led.value(1)
+            time.sleep(0.02)
+            led.value(0)
 
-# Sensor ultrasónico
+# Sensor ultrasónico con timeout
 def ultrasonido():
     trig.low()
-    utime.sleep_us(2)
+    time.sleep_us(2)
     trig.high()
-    utime.sleep_us(10)
+    time.sleep_us(10)
     trig.low()
 
+    start = time.ticks_us()
     while echo.value() == 0:
-        pulse_start = utime.ticks_us()
-    while echo.value() == 1:
-        pulse_end = utime.ticks_us()
+        if time.ticks_diff(time.ticks_us(), start) > 30000:
+            return 999  # sin respuesta
+        pulse_start = time.ticks_us()
 
-    pulse_duration = utime.ticks_diff(pulse_end, pulse_start)
-    distancia = pulse_duration * 0.0343 / 2
-    return distancia
+    while echo.value() == 1:
+        if time.ticks_diff(time.ticks_us(), start) > 30000:
+            return 999
+        pulse_end = time.ticks_us()
+
+    pulse_duration = time.ticks_diff(pulse_end, pulse_start)
+    return (pulse_duration * 0.0343) / 2
 
 # Ejecutar la melodía de inicio en el segundo núcleo
 _thread.start_new_thread(inicio, ())
 
-# Bucle principal: escucha Bluetooth y sensor
+# Bucle principal
+dato = ""
 while True:
     if modulo.any() > 0:
-        dato = modulo.read(1).decode().strip()
-        print("Dato recibido:", dato)
-        if dato == "F":
-            adelante()
-        elif dato == "B":
-            atras()
-        elif dato == "R":
-            izquierda()
-        elif dato == "L":
-            derecha()
-        elif dato == "S":
-            parar()
-        elif dato == "W":
-            bncs()
-        elif dato == "w":
-            blancas.value(0)
-        elif dato == "U":
-            ver()
-        elif dato == "u":
-            verdes.value(0)
-        elif dato == "X":
-            inicio()
-        elif dato == "V":
-            bocina()
-        elif dato == "v":
-            buzzer.duty_u16(0)
+        recibido = modulo.read(1)
+        if recibido:
+            dato = recibido.decode().strip()
+            print("Dato recibido:", dato)
+            if dato == "F":
+                adelante()
+            elif dato == "B":
+                atras()
+            elif dato == "R":
+                izquierda()
+            elif dato == "L":
+                derecha()
+            elif dato == "S":
+                parar()
+            elif dato == "W":
+                bncs()
+            elif dato == "w":
+                blancas.value(0)
+            elif dato == "U":
+                ver()
+            elif dato == "u":
+                verdes.value(0)
+            elif dato == "X":
+                inicio()
+            elif dato == "V":
+                bocina()
+            elif dato == "v":
+                buzzer.duty_u16(0)
 
     # Verificar obstáculo
     distancia_actual = ultrasonido()
