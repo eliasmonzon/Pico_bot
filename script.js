@@ -1,5 +1,5 @@
 // CONFIGURA TU USUARIO Y REPO
-const usuario = "PIBSAS"; // ejemplo: "eliasmonzon"
+const usuario = "eliasmonzon"; // ejemplo: "eliasmonzon"
 const repo = "Pico_Robot";       // ejemplo: "pico_bot"
 
 const contenedorLecciones = document.querySelector(".lessons-container");
