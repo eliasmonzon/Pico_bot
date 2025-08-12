@@ -1,6 +1,6 @@
 // CONFIGURA TU USUARIO Y REPO
 const usuario = "eliasmonzon"; // ejemplo: "eliasmonzon"
-const repo = "Pico_Robot";       // ejemplo: "pico_bot"
+const repo = "eliasmonzon/Pico_bot";       // ejemplo: "pico_bot"
 
 const contenedorLecciones = document.querySelector(".lessons-container");
 const contenedorPDF = document.querySelector(".doc-section");
